@@ -747,3 +747,37 @@ body{
 @media (prefers-reduced-motion: reduce){
   .confetti-piece{ display:none; }
 }
+
+/* ─── Модалка инструкции ───────────────────────── */
+.rules-list{
+  margin:0;
+  padding:0 0 0 20px;
+  font-size:14px;
+  line-height:1.65;
+  color:var(--text);
+}
+.rules-list li{
+  margin-bottom:10px;
+}
+.rules-list li:last-child{ margin-bottom:0; }
+.rules-list b{
+  color:var(--accent);
+  font-weight:700;
+}
+.rules-list .accent-jackpot{
+  color:var(--jackpot);
+  font-weight:700;
+}
+.rules-list .accent-gold{
+  color:var(--gold);
+  font-weight:700;
+}
+.rules-subtitle{
+  font-size:12px;
+  color:var(--muted);
+  text-transform:uppercase;
+  letter-spacing:.5px;
+  margin:16px 0 8px;
+  font-weight:700;
+}
+.rules-subtitle:first-child{ margin-top:0; }

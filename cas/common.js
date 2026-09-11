@@ -898,6 +898,41 @@
     }
   });
 
+  /* ─── Модалка правил ───────────────────────────── */
+  const rulesBtn = document.getElementById("rulesBtn");
+  const rulesOverlay = document.getElementById("rulesOverlay");
+  const rulesClose = document.getElementById("rulesClose");
+
+  if(rulesBtn && rulesOverlay && rulesClose){
+    rulesBtn.addEventListener("click", ()=>{
+      rulesOverlay.classList.add("open");
+    });
+    rulesClose.addEventListener("click", ()=>{
+      rulesOverlay.classList.remove("open");
+    });
+  }
+
+  /* ─── Закрытие модалок по клику на фон и по Esc ── */
+  function closeOnBackdrop(overlay){
+    overlay.addEventListener("click", (e)=>{
+      // клик именно по затемнённому фону, не по содержимому окна
+      if(e.target === overlay){
+        overlay.classList.remove("open");
+      }
+    });
+  }
+  closeOnBackdrop(collectionOverlay);
+  closeOnBackdrop(calibOverlay);
+  if(rulesOverlay) closeOnBackdrop(rulesOverlay);
+
+  document.addEventListener("keydown", e=>{
+    if(e.key === "Escape"){
+      collectionOverlay.classList.remove("open");
+      calibOverlay.classList.remove("open");
+      if(rulesOverlay) rulesOverlay.classList.remove("open");
+    }
+  });
+
   /* ─── Инициализация ───────────────────────────── */
   updateStatsUI();
   updateLuckUI();
