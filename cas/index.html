@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☂️</text></svg>">
+<title>Погодный бандит</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="bandit">
+  <div class="machine">
+    <div class="lamps" id="lamps"></div>
+
+    <div class="reels" id="reels">
+      <div class="reel"><div class="strip" id="reel0"></div></div>
+      <div class="reel"><div class="strip" id="reel1"></div></div>
+      <div class="reel"><div class="strip" id="reel2"></div></div>
+    </div>
+
+    <div class="lever-wrap">
+      <div class="lever-hinge"></div>
+      <div class="lever" id="lever"><div class="knob"></div></div>
+    </div>
+
+    <div class="score">Попыток: <b id="attempts">0</b> &nbsp;·&nbsp; Выигрышей: <b id="wins">0</b> &nbsp;·&nbsp; Джекпотов: <b id="jackpots">0</b></div>
+
+    <div class="luck">
+      <div class="luck-bar"><div class="luck-bar-fill" id="luckFill"></div></div>
+      <div class="luck-label" id="luckLabel">Удача: 2,8%</div>
+    </div>
+  </div>
+
+  <div class="result" id="result">Дёрни рычаг — узнаем, какая погода тебе выпадет.</div>
+  <div class="hint">
+    <span class="hint-pc">Тяни рычаг или жми <kbd>Space</kbd></span>
+    <span class="hint-mobile">Тяни рычаг</span>
+  </div>
+
+  <div class="panel">
+    <div class="player-panel">
+      <div class="current-skin">
+        <div class="current-skin-img" id="currentSkinImg">☂️</div>
+        <div class="current-skin-info">
+          <div class="current-skin-name" id="currentSkinName">Базовый</div>
+          <div class="current-skin-progress" id="currentSkinProgress">0 / 2 выигрышей</div>
+        </div>
+      </div>
+      <div class="bar-actions">
+        <button class="bar-btn primary" id="openCollection">Коллекция</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <span>Последние прокрутки</span>
+      <button class="panel-header-clear" id="historyClear">Очистить</button>
+    </div>
+    <div class="history">
+      <div class="history-list" id="historyList">
+        <div class="history-empty">Пока пусто — дёрни рычаг.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header"><span>Настройки</span></div>
+    <div class="settings-panel">
+      <div class="settings-row">
+        <span class="settings-label">Звук</span>
+        <button class="settings-btn" id="soundToggle">
+          <span class="icon" id="soundIcon">🔊</span>
+          <span id="soundLabel">Вкл</span>
+        </button>
+      </div>
+      <div class="settings-row">
+        <span class="settings-label">Задержка</span>
+        <button class="settings-btn" id="calibBtn">
+          <span class="icon">⚙️</span>
+          <span>Настроить</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="confetti-layer" id="confettiLayer"></div>
+<div class="calib-flash" id="calibFlash"></div>
+
+<div class="modal-overlay" id="collectionOverlay">
+  <div class="modal">
+    <h2>Коллекция зонтов</h2>
+    <p class="modal-sub">
+      Зонты открываются за выигрыши, а «Светлячок» — за джекпоты (три зонтика).
+      Открыто: <b id="collectionUnlocked">1</b> из <b id="collectionTotal">14</b>.
+    </p>
+    <div class="collection-grid" id="collectionGrid"></div>
+    <div class="modal-actions">
+      <button class="ghost" id="collectionReset">Сбросить всё</button>
+      <button id="collectionClose">Готово</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="calibOverlay">
+  <div class="modal">
+    <h2>Задержка звука</h2>
+    <p class="modal-sub">
+      Если «дзынь» слышен с опозданием — увеличь задержку. Звук будет
+      стартовать раньше, чтобы совпасть с остановкой барабана.
+    </p>
+    <div class="calib-value">
+      <span>Задержка</span>
+      <b><span id="calibVal">80</span> мс</b>
+    </div>
+    <input type="range" id="calibRange" min="0" max="1500" step="10" value="80">
+    <div class="modal-actions">
+      <button class="ghost" id="calibTest">Проверить</button>
+      <button id="calibClose">Готово</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Картинки — локальные из папок skins/ и icons/ */
+window.ICONS = {
+  sun:      { src:"icons/sun.svg",       label:"Солнечно", emoji:"☀️" },
+  cloud:    { src:"icons/cloud.svg",     label:"Облачно",  emoji:"☁️" },
+  rain:     { src:"icons/rain.svg",      label:"Дождь",    emoji:"🌧️" },
+  storm:    { src:"icons/storm.svg",     label:"Гроза",    emoji:"⛈️" },
+  snow:     { src:"icons/snow.svg",      label:"Снег",     emoji:"❄️" },
+  umbrella: { src:"icons/umbrella.png",  label:"Зонтик",   emoji:"☂️" },
+};
+
+window.SKINS = [
+  { id: 1,  name:"Базовый",   wins:0,     rare:false, img:"skins/01_basic.png" },
+  { id: 2,  name:"Колечки",   wins:2,     rare:false, img:"skins/02_rings.png" },
+  { id: 3,  name:"Листва",    wins:5,     rare:false, img:"skins/03_leaves.png" },
+  { id: 4,  name:"Кристалл",  wins:12,    rare:false, img:"skins/04_crystal.png" },
+  { id: 5,  name:"Огоньки",   wins:25,    rare:false, img:"skins/05_lights.png" },
+  { id: 6,  name:"Цирк",      wins:50,    rare:false, img:"skins/06_circus.png" },
+  { id: 7,  name:"Блеск",     wins:75,    rare:true,  img:"skins/07_shine.png" },
+  { id: 8,  name:"Пайетка",   wins:100,   rare:true,  img:"skins/08_sequin.png" },
+  { id: 9,  name:"Корова",    wins:125,   rare:true,  img:"skins/09_cow.png" },
+  { id: 10, name:"Жираф",     wins:150,   rare:true,  img:"skins/10_jiraf.png" },
+  { id: 11, name:"Зебра",     wins:175,   rare:true,  img:"skins/11_zebra.png" },
+  { id: 12, name:"Леопард",   wins:200,   rare:true,  img:"skins/12_leopard.png" },
+  { id: 13, name:"Тигрица",   wins:250,   rare:true,  img:"skins/13_tigr.png" },
+  { id: 14, name:"Светлячок", jackpots:5, rare:true, secret:true, img:"skins/14_secret.png" },
+];
+</script>
+<script src="common.js"></script>
+</body>
+</html>
